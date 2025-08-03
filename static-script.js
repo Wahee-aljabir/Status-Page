@@ -3,8 +3,7 @@ class StaticStatusPage {
         this.services = [];
         this.serviceStatuses = {};
         this.lastUpdate = null;
-        this.refreshInterval = 30000;
-        this.autoRefreshTimer = null;
+
         this.corsProxies = [];
         this.timeout = 10000;
         this.slowThreshold = 5000;
@@ -83,7 +82,6 @@ class StaticStatusPage {
         this.initializeStatuses();
         await this.checkAllServices();
         this.setupEventListeners();
-        this.startAutoRefresh();
     }
     
     initializeStatuses() {
@@ -99,20 +97,10 @@ class StaticStatusPage {
     
     setupEventListeners() {
         const refreshBtn = document.getElementById('refreshBtn');
-        const testBtn = document.getElementById('testBtn');
-        const refreshInterval = document.getElementById('refreshInterval');
         const themeToggle = document.getElementById('themeToggle');
         
         refreshBtn.addEventListener('click', () => {
             this.checkAllServices();
-        });
-        
-        testBtn.addEventListener('click', () => {
-            this.testIndividualServices();
-        });
-        
-        refreshInterval.addEventListener('change', (e) => {
-            this.updateRefreshInterval();
         });
         
         themeToggle.addEventListener('click', () => {
@@ -290,26 +278,7 @@ class StaticStatusPage {
         console.log('✨ All services checked');
     }
     
-    async testIndividualServices() {
-        console.log('🧪 Testing individual services...');
-        
-        for (const service of this.services) {
-            console.log(`\n--- Testing ${service.name} ---`);
-            console.log(`URL: ${service.url}`);
-            console.log(`Method: ${service.checkMethod}`);
-            
-            this.updateLoadingState();
-            
-            await this.checkServiceStatus(service);
-            
-            this.updateUI();
-            
-            // Wait a bit between tests to avoid overwhelming the browser
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        
-        console.log('\n✅ Individual service testing completed!');
-    }
+
     
     updateLoadingState() {
         const grid = document.getElementById('servicesGrid');
@@ -320,7 +289,6 @@ class StaticStatusPage {
         this.updateOverview();
         this.renderServices();
         this.updateLastUpdateTime();
-        this.updateRefreshInterval();
     }
     
     updateOverview() {
@@ -422,22 +390,7 @@ class StaticStatusPage {
         }
     }
     
-    updateRefreshInterval() {
-        const intervalSeconds = Math.floor(this.refreshInterval / 1000);
-        document.getElementById('refreshInterval').textContent = intervalSeconds;
-    }
-    
-    startAutoRefresh() {
-        if (this.autoRefreshTimer) {
-            clearInterval(this.autoRefreshTimer);
-        }
-        
-        this.autoRefreshTimer = setInterval(() => {
-            if (!document.hidden) {
-                this.checkAllServices();
-            }
-        }, this.refreshInterval);
-    }
+
     
     formatTime(timestamp) {
         const date = new Date(timestamp);
