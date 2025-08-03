@@ -1,27 +1,46 @@
 # 🔍 Service Status Page
 
-A beautiful, real-time status page that monitors URLs and displays their operational status using a modern web interface with red, green, and yellow color indicators.
+A modern, responsive service status monitoring page that tracks the availability and response times of multiple web services in real-time. Built with vanilla JavaScript as a lightweight static site optimized for Vercel deployment.
 
 ## ✨ Features
 
-- **Real-time Monitoring**: Automatically checks service status every 30 seconds
-- **Visual Status Indicators**: 
-  - 🟢 **Green**: Service is operational (response time < 5s)
-  - 🟡 **Yellow**: Service is slow (response time > 5s)
-  - 🔴 **Red**: Service is down or unreachable
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
-- **Modern UI**: Beautiful gradient backgrounds with glassmorphism effects
-- **Configurable**: Easy to add/remove services via JSON configuration
-- **Auto-refresh**: Automatically updates status without page reload
-- **Error Handling**: Displays detailed error messages for debugging
+- **Multi-endpoint monitoring** with automatic failover
+- **Multiple connection methods** (Direct CORS, Proxy fallback, Mixed approach)
+- **Real-time monitoring** of multiple services with redundancy
+- **Beautiful, responsive design** with modern UI
+- **Color-coded status indicators** (🟢 Green = Up, 🟡 Yellow = Slow, 🔴 Red = Down)
+- **Response time tracking** for performance monitoring
+- **Auto-refresh functionality** with customizable intervals
+- **Mobile-friendly interface** that works on all devices
+- **Easy JSON configuration** with multiple URL fallbacks per service
+- **Vercel optimized** - clean static site deployment
+- **No database required** - runs entirely client-side
+- **Advanced debugging** with individual service testing
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Static Version (Vercel/Netlify)
+
+1. **Open the static version**:
+   - Simply open `index.html` in your browser
+   - Or deploy to Vercel/Netlify by uploading the files
+
+2. **For Vercel deployment**:
+   ```bash
+   # Install Vercel CLI
+   npm i -g vercel
+   
+   # Deploy
+   vercel
+   ```
+
+### Option 2: Node.js Version
+
+#### Prerequisites
 - Node.js (v14 or higher)
 - npm or yarn
 
-### Installation
+#### Installation
 
 1. **Install dependencies**:
    ```bash
@@ -40,30 +59,47 @@ A beautiful, real-time status page that monitors URLs and displays their operati
 
 ## ⚙️ Configuration
 
-Edit the `config.json` file to customize which services to monitor:
+The status page now reads its configuration from <mcfile name="config.json" path="c:\Users\wahee\OneDrive\Documents\Code\Javascript\Status Page\config.json"></mcfile>. This makes it easy to modify services without touching the code:
 
 ```json
 {
   "services": [
     {
-      "name": "Your Service Name",
-      "url": "https://your-service.com",
-      "description": "Description of your service"
+      "name": "Your Service",
+      "description": "Service description",
+      "urls": [
+        "https://your-service.com",
+        "https://backup.your-service.com"
+      ],
+      "checkMethod": "mixed",
+      "category": "Your Category"
     }
   ],
-  "checkInterval": 30000,
-  "timeout": 10000
+  "settings": {
+    "refreshInterval": 30000,
+    "timeout": 10000,
+    "slowThreshold": 5000,
+    "corsProxies": [
+      "https://api.codetabs.com/v1/proxy?quest=",
+      "https://thingproxy.freeboard.io/fetch/",
+      "https://api.allorigins.win/get?url="
+    ]
+  }
 }
 ```
 
-### Configuration Options
+### Service Configuration Options:
+- **name**: Display name of the service
+- **description**: Brief description shown on the card
+- **urls**: Array of URLs to check (supports multiple fallback endpoints)
+- **checkMethod**: Connection method (`direct`, `cors`, or `mixed`)
+- **category**: Service category for organization
 
-- **services**: Array of services to monitor
-  - `name`: Display name for the service
-  - `url`: URL to monitor
-  - `description`: Optional description
-- **checkInterval**: How often to check services (in milliseconds)
-- **timeout**: Request timeout (in milliseconds)
+### Settings Configuration:
+- **refreshInterval**: Auto-refresh interval in milliseconds (default: 30000)
+- **timeout**: Request timeout in milliseconds (default: 10000)
+- **slowThreshold**: Response time threshold for "slow" status (default: 5000)
+- **corsProxies**: Array of CORS proxy URLs for fallback
 
 ## 🎨 Status Colors
 
@@ -75,36 +111,80 @@ Edit the `config.json` file to customize which services to monitor:
 
 ```
 status-page/
-├── server.js          # Express server and monitoring logic
-├── config.json        # Service configuration
-├── package.json       # Dependencies and scripts
-├── public/
-│   ├── index.html     # Main HTML page
-│   ├── styles.css     # CSS styles with color themes
-│   └── script.js      # Frontend JavaScript
-└── README.md          # This file
+├── index.html          # Main HTML file
+├── styles.css          # CSS styles
+├── static-script.js    # JavaScript functionality
+├── config.json         # Service configuration
+├── vercel.json         # Vercel deployment config
+├── .gitignore          # Git ignore file
+└── README.md           # This file
 ```
 
-## 🔧 API Endpoints
+## 🚀 Deployment
 
-- `GET /` - Main status page
-- `GET /api/status` - JSON API for current service status
-- `GET /api/config` - JSON API for configuration
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. The `vercel.json` file is configured with:
+   - CORS headers for API compatibility
+   - Caching optimization
+   - Static file serving
+
+### Other Static Hosts
+The status page works on any static hosting service:
+- Netlify
+- GitHub Pages
+- Firebase Hosting
+- AWS S3 + CloudFront
+- Any web server serving static files
+
+## 🛠️ Development
+
+1. Clone the repository
+2. Open `index.html` in your browser
+3. Edit `config.json` to add/modify services
+4. Customize styles in `styles.css` if needed
+
+## 📊 Status Indicators
+
+- 🟢 **Green (Up)**: Service is operational (response time < 5 seconds)
+- 🟡 **Yellow (Slow)**: Service is slow (response time > 5 seconds)
+- 🔴 **Red (Down)**: Service is unreachable or returned an error
+
+## 🎨 Customization
+
+### Colors
+Edit the CSS variables in `styles.css` to customize the color scheme:
+
+```css
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+}
+```
+
+### Services
+Modify the `config.json` file to monitor your own services - no code changes required!
 
 ## 🚀 Production Deployment
 
-For production use:
+### Static Version (Recommended)
 
+**Vercel:**
 ```bash
-npm start
+npm i -g vercel
+vercel
 ```
 
-Or use a process manager like PM2:
+**Netlify:**
+- Drag and drop the files to Netlify dashboard
+- Or connect your Git repository
 
-```bash
-npm install -g pm2
-pm2 start server.js --name "status-page"
-```
+**GitHub Pages:**
+- Push to GitHub repository
+- Enable GitHub Pages in repository settings
 
 ## 🛠️ Customization
 

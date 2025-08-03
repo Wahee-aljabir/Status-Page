@@ -10,13 +10,31 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="title">🔍 Service Status Dashboard</h1>
-            <p class="subtitle">Real-time monitoring of critical services</p>
+            <h1>🚦 Service Status Dashboard</h1>
             <div class="last-update">
                 <span id="lastUpdate">Last updated: Loading...</span>
-                <button id="refreshBtn" class="refresh-btn">🔄 Refresh</button>
             </div>
         </header>
+
+        <div class="controls">
+            <button id="refreshBtn" class="refresh-btn">
+                <span class="refresh-icon">🔄</span>
+                Refresh Status
+            </button>
+            <button id="testBtn" class="test-btn">
+                <span class="test-icon">🧪</span>
+                Test Individual Services
+            </button>
+            <div class="auto-refresh">
+                <label for="refreshInterval">Auto-refresh:</label>
+                <select id="refreshInterval">
+                    <option value="30">30 seconds</option>
+                    <option value="60" selected>1 minute</option>
+                    <option value="300">5 minutes</option>
+                    <option value="0">Disabled</option>
+                </select>
+            </div>
+        </div>
 
         <div class="status-overview">
             <div class="status-card">
@@ -59,6 +77,6 @@
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script src="static-script.js"></script>
 </body>
 </html>

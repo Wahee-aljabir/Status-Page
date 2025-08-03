@@ -2,25 +2,49 @@
   "services": [
     {
       "name": "VexelNexus",
-      "url": "https://pusher-chat-app-c77w.onrender.com",
-      "description": "Vexel's Hub"
+      "description": "Chat App",
+      "urls": [
+        "https://pusher-chat-app-c77w.onrender.com"
+      ],
+      "checkMethod": "mixed",
+      "category": "Applications"
     },
     {
       "name": "VexelCore",
-      "url": "https://ai-app-lv3a.onrender.com",
-      "description": "Vexel's AI App"
+      "description": "AI App",
+      "urls": [
+        "https://ai-app-lv3a.onrender.com"
+      ],
+      "checkMethod": "mixed",
+      "category": "Applications"
     },
     {
       "name": "QuizCraft",
-      "url": "https://quizcraft-yh0t.onrender.com",
-      "description": "Proffesional Quiz Platform"
+      "description": "Professional Quiz App",
+      "urls": [
+        "https://quizcraft-yh0t.onrender.com"
+      ],
+      "checkMethod": "mixed",
+      "category": "Applications"
     },
     {
-      "name": "2D Minecraft",
-      "url": "https://cubx.vercel.app",
-      "description": "Similar to 2D Paper Minecraft"
+      "name": "Cubx",
+      "description": "A Paper Minecraft Clone",
+      "urls": [
+        "https://cubx.vercel.app"
+      ],
+      "checkMethod": "mixed",
+      "category": "Games"
     }
   ],
-  "checkInterval": 30000,
-  "timeout": 10000
+  "settings": {
+    "refreshInterval": 30000,
+    "timeout": 10000,
+    "slowThreshold": 5000,
+    "corsProxies": [
+      "https://api.codetabs.com/v1/proxy?quest=",
+      "https://thingproxy.freeboard.io/fetch/",
+      "https://api.allorigins.win/get?url="
+    ]
+  }
 }
