@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Status Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🔍 Service Status Dashboard</h1>
+            <p class="subtitle">Real-time monitoring of critical services</p>
+            <div class="last-update">
+                <span id="lastUpdate">Last updated: Loading...</span>
+                <button id="refreshBtn" class="refresh-btn">🔄 Refresh</button>
+            </div>
+        </header>
+
+        <div class="status-overview">
+            <div class="status-card">
+                <div class="status-number" id="upCount">0</div>
+                <div class="status-label">Services Up</div>
+                <div class="status-indicator up"></div>
+            </div>
+            <div class="status-card">
+                <div class="status-number" id="slowCount">0</div>
+                <div class="status-label">Slow Response</div>
+                <div class="status-indicator slow"></div>
+            </div>
+            <div class="status-card">
+                <div class="status-number" id="downCount">0</div>
+                <div class="status-label">Services Down</div>
+                <div class="status-indicator down"></div>
+            </div>
+        </div>
+
+        <main class="services-grid" id="servicesGrid">
+            <!-- Services will be populated here -->
+        </main>
+
+        <footer class="footer">
+            <p>Auto-refresh every <span id="refreshInterval">30</span> seconds</p>
+            <div class="status-legend">
+                <div class="legend-item">
+                    <div class="legend-dot up"></div>
+                    <span>Operational</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot slow"></div>
+                    <span>Slow Response</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot down"></div>
+                    <span>Down</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

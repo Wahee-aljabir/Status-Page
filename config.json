@@ -1,0 +1,26 @@
+{
+  "services": [
+    {
+      "name": "VexelNexus",
+      "url": "https://pusher-chat-app-c77w.onrender.com",
+      "description": "Vexel's Hub"
+    },
+    {
+      "name": "VexelCore",
+      "url": "https://ai-app-lv3a.onrender.com",
+      "description": "Vexel's AI App"
+    },
+    {
+      "name": "QuizCraft",
+      "url": "https://quizcraft-yh0t.onrender.com",
+      "description": "Proffesional Quiz Platform"
+    },
+    {
+      "name": "2D Minecraft",
+      "url": "https://cubx.vercel.app",
+      "description": "Similar to 2D Paper Minecraft"
+    }
+  ],
+  "checkInterval": 30000,
+  "timeout": 10000
+}
