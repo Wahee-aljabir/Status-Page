@@ -8,6 +8,9 @@ class StaticStatusPage {
         this.corsProxies = [];
         this.timeout = 10000;
         this.slowThreshold = 5000;
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        
+        this.initializeTheme();
         
         this.loadConfig().then(() => {
             this.init();
@@ -15,6 +18,26 @@ class StaticStatusPage {
             console.error('Failed to load configuration:', error);
             this.showError('Failed to load configuration. Please check config.json file.');
         });
+    }
+    
+    initializeTheme() {
+        document.documentElement.setAttribute('data-theme', this.currentTheme);
+        this.updateThemeToggleIcon();
+    }
+    
+    toggleTheme() {
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', this.currentTheme);
+        localStorage.setItem('theme', this.currentTheme);
+        this.updateThemeToggleIcon();
+    }
+    
+    updateThemeToggleIcon() {
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.textContent = this.currentTheme === 'light' ? '🌙' : '☀️';
+            themeToggle.title = `Switch to ${this.currentTheme === 'light' ? 'dark' : 'light'} mode`;
+        }
     }
     
     async loadConfig() {
@@ -78,6 +101,7 @@ class StaticStatusPage {
         const refreshBtn = document.getElementById('refreshBtn');
         const testBtn = document.getElementById('testBtn');
         const refreshInterval = document.getElementById('refreshInterval');
+        const themeToggle = document.getElementById('themeToggle');
         
         refreshBtn.addEventListener('click', () => {
             this.checkAllServices();
@@ -89,6 +113,10 @@ class StaticStatusPage {
         
         refreshInterval.addEventListener('change', (e) => {
             this.updateRefreshInterval();
+        });
+        
+        themeToggle.addEventListener('click', () => {
+            this.toggleTheme();
         });
         
         // Refresh when page becomes visible again
