@@ -85,8 +85,9 @@ class StaticStatusPage {
     }
     
     initializeStatuses() {
-        this.services.forEach(service => {
-            this.serviceStatuses[service.name] = {
+        const allServices = this.getAllServices();
+        allServices.forEach(service => {
+            this.serviceStatuses[service.id || service.name] = {
                 status: 'unknown',
                 responseTime: null,
                 lastChecked: null,
@@ -116,8 +117,39 @@ class StaticStatusPage {
     }
     
     async checkServiceStatus(service) {
+        const maxRetries = 5;
+        const retryDelay = 1000; // 1 second delay between retries
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            console.log(`🔄 ${service.name}: Attempt ${attempt}/${maxRetries}`);
+            
+            const result = await this.attemptServiceCheck(service);
+            if (result.success) {
+                return; // Service is up, exit early
+            }
+            
+            // If this isn't the last attempt, wait before retrying
+            if (attempt < maxRetries) {
+                console.log(`⏳ ${service.name}: Waiting ${retryDelay}ms before retry ${attempt + 1}`);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+        }
+        
+        // All retries failed, mark service as down
+        this.serviceStatuses[service.id || service.name] = {
+            status: 'down',
+            responseTime: null,
+            lastChecked: new Date().toISOString(),
+            error: `Service failed after ${maxRetries} attempts with all connection methods`
+        };
+        
+        console.log(`❌ ${service.name}: down - Failed after ${maxRetries} attempts`);
+    }
+    
+    async attemptServiceCheck(service) {
         const startTime = Date.now();
         const urls = service.urls || [service.url]; // Support both new and old format
+        const checkMethod = service.checkMethod || 'direct';
         
         // Try each URL until one succeeds
         for (let urlIndex = 0; urlIndex < urls.length; urlIndex++) {
@@ -125,7 +157,7 @@ class StaticStatusPage {
             console.log(`🔍 Trying ${service.name} URL ${urlIndex + 1}/${urls.length}: ${currentUrl}`);
             
             // Try direct connection first for direct and mixed methods
-            if (service.checkMethod === 'direct' || service.checkMethod === 'mixed') {
+            if (checkMethod === 'direct' || checkMethod === 'mixed') {
                 try {
                     const response = await fetch(currentUrl, {
                         method: 'GET',
@@ -144,7 +176,7 @@ class StaticStatusPage {
                             status = 'slow';
                         }
                         
-                        this.serviceStatuses[service.name] = {
+                        this.serviceStatuses[service.id || service.name] = {
                             status: status,
                             responseTime: responseTime,
                             lastChecked: new Date().toISOString(),
@@ -153,21 +185,14 @@ class StaticStatusPage {
                         };
                         
                         console.log(`✅ ${service.name}: ${status} (${responseTime}ms) via ${currentUrl}`);
-                        return;
+                        return { success: true };
                     }
                 } catch (error) {
                     console.log(`⚠️ Direct connection failed for ${service.name} (${currentUrl}): ${error.message}`);
                     
-                    // If this is a 'direct' only service and we've tried all URLs, mark as down
-                    if (service.checkMethod === 'direct' && urlIndex === urls.length - 1) {
-                        this.serviceStatuses[service.name] = {
-                            status: 'down',
-                            responseTime: null,
-                            lastChecked: new Date().toISOString(),
-                            error: `All direct connections failed. Last error: ${error.message}`
-                        };
-                        console.log(`❌ ${service.name}: down - All direct URLs failed`);
-                        return;
+                    // If this is a 'direct' only service and we've tried all URLs, continue to next attempt
+                    if (checkMethod === 'direct' && urlIndex === urls.length - 1) {
+                        return { success: false, error: `All direct connections failed. Last error: ${error.message}` };
                     }
                 }
             }
@@ -224,7 +249,7 @@ class StaticStatusPage {
                                     status = 'slow';
                                 }
                                 
-                                this.serviceStatuses[service.name] = {
+                                this.serviceStatuses[service.id || service.name] = {
                                     status: status,
                                     responseTime: responseTime,
                                     lastChecked: new Date().toISOString(),
@@ -234,7 +259,7 @@ class StaticStatusPage {
                                 };
                                 
                                 console.log(`✅ ${service.name}: ${status} (${responseTime}ms) via proxy`);
-                                return;
+                                return { success: true };
                             }
                         }
                         
@@ -245,15 +270,8 @@ class StaticStatusPage {
             }
         }
         
-        // If we get here, all methods failed
-        this.serviceStatuses[service.name] = {
-            status: 'down',
-            responseTime: null,
-            lastChecked: new Date().toISOString(),
-            error: `All connection methods failed for all URLs`
-        };
-        
-        console.log(`❌ ${service.name}: down - All methods and URLs failed`);
+        // If we get here, this attempt failed
+        return { success: false, error: 'All connection methods failed for all URLs' };
     }
     
     async checkAllServices() {
@@ -262,13 +280,16 @@ class StaticStatusPage {
         // Show loading state
         this.updateLoadingState();
         
+        // Get all services (default + user-defined)
+        const allServices = this.getAllServices();
+        
         // Check services with a reasonable delay to avoid rate limiting
-        for (let i = 0; i < this.services.length; i++) {
-            await this.checkServiceStatus(this.services[i]);
+        for (let i = 0; i < allServices.length; i++) {
+            await this.checkServiceStatus(allServices[i]);
             this.updateUI(); // Update UI after each service check
             
             // Add small delay between requests
-            if (i < this.services.length - 1) {
+            if (i < allServices.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
         }
@@ -305,8 +326,9 @@ class StaticStatusPage {
         const grid = document.getElementById('servicesGrid');
         grid.innerHTML = '';
         
-        this.services.forEach(service => {
-            const serviceStatus = this.serviceStatuses[service.name];
+        const allServices = this.getAllServices();
+        allServices.forEach(service => {
+            const serviceStatus = this.serviceStatuses[service.id || service.name];
             const card = this.createServiceCard(service, serviceStatus);
             grid.appendChild(card);
         });
@@ -410,6 +432,47 @@ class StaticStatusPage {
                 return date.toLocaleDateString();
             }
         }
+    }
+    
+    // User service management methods
+    loadUserServices() {
+        const stored = localStorage.getItem('userServices');
+        return stored ? JSON.parse(stored) : [];
+    }
+    
+    saveUserServices(services) {
+        localStorage.setItem('userServices', JSON.stringify(services));
+    }
+    
+    getAllServices() {
+        const userServices = this.loadUserServices();
+        return [...this.services, ...userServices];
+    }
+    
+    addUserService(service) {
+        const userServices = this.loadUserServices();
+        service.id = Date.now().toString(); // Simple ID generation
+        userServices.push(service);
+        this.saveUserServices(userServices);
+        return service;
+    }
+    
+    updateUserService(serviceId, updatedService) {
+        const userServices = this.loadUserServices();
+        const index = userServices.findIndex(s => s.id === serviceId);
+        if (index !== -1) {
+            userServices[index] = { ...updatedService, id: serviceId };
+            this.saveUserServices(userServices);
+            return true;
+        }
+        return false;
+    }
+    
+    deleteUserService(serviceId) {
+        const userServices = this.loadUserServices();
+        const filtered = userServices.filter(s => s.id !== serviceId);
+        this.saveUserServices(filtered);
+        return userServices.length !== filtered.length;
     }
     
     escapeHtml(text) {
