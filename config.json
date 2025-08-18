@@ -35,6 +35,15 @@
       ],
       "checkMethod": "mixed",
       "category": "Games"
+    },
+    {
+      "name": "Virtual Gaming",
+      "description": "Gaming Platform",
+      "urls": [
+        "https://virtualgaming.vercel.app"
+      ],
+      "checkMethod": "mixed",
+      "category": "Games"
     }
   ],
   "settings": {
